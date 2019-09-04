@@ -19,6 +19,7 @@ const CAMPAIGN_LOAD_ABIS = new Set([
   //"CampaignByVotes", 
   "CampaignRegistry",
   "CampaignManager",
+  "CampaignFactory",
   //"KingTokenERC667",
   //"TestContract",
 ]);

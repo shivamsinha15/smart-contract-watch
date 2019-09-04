@@ -12,7 +12,7 @@ const postRequest = async (URL,postBody) => {
 
 const DELAYED_UPDATE = 5000;
 const ENABLED_EVENTS = [   
-           'NewCampaign',
+            'NEW_CAMPAIGN',
             'VOTED', 
             'PARTICIPATED'
         ];
@@ -30,6 +30,9 @@ export default async (data,instances) => {
 
         data.decodedLogs.forEach( log => {
             let name = log.name;
+            console.log(chalk.red(">>>>><<><><><>><><><"))
+            console.log(chalk.red(name));
+            console.log(chalk.red(">>>>><<><><><>><><><"))
             if(!ENABLED_EVENTS.includes(name)) {
                 return;
             }
