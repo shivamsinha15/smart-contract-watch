@@ -11,7 +11,7 @@ export const isInArray = (array, element) => array.indexOf(element) >= 0;
  * @param string address
  * @return bool
  */
-export const isContractCreationTransaction = address => !address;
+export const isContractCreationTransaction = address => !address || address === '0x0';
 
 /**
  * Check if address is not undefined and exists inside the array

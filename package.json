@@ -35,10 +35,13 @@
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "chalk": "^2.4.2",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
+    "dotenv-flow": "^3.0.0",
     "request": "^2.82.0",
     "request-promise": "^4.2.1",
+    "smart-contract-loader": "^1.0.5",
     "web3": "0.19.0",
     "winston": "2.3.1",
     "yamljs": "^0.3.0"

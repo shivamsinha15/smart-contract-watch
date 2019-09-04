@@ -108,9 +108,13 @@ export default class JsonRpc {
    * @returns {Object} formatted string
    */
   async scanTransaction(txn) {
+    logger.debug("ScaningTransaction....");
     try {
+      logger.info("1")
+
       const txnReceipts =
       await this.getTransactionReceiptAsync(txn.hash).timeout(promiseTimeoutInMilliseconds);
+      //logger.debug(`txnReceipts ${JSON.stringify(txnReceipts)}`);
       const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
         log.address)) : [];
 
@@ -118,8 +122,11 @@ export default class JsonRpc {
         throw new Error('Address you entered is not a smart contract');
       }
 
+      logger.info("2")
+
       // If the smart contract received transaction or there's logs execute the callback function
       if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
+        logger.info("3")
         return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
       }
     } catch (e) {
@@ -196,7 +203,9 @@ export default class JsonRpc {
     const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
-
+    console.log("blockTransactionsWithLogsList");
+    console.log(blockTransactionsWithLogsList);
+    return;
     if (this.callback) {
       blockTransactionsWithLogsList.forEach((transaction) => {
         this.callback(transaction, this.addresses);

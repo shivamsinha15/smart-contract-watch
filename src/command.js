@@ -129,7 +129,7 @@ export default (watchPath) => {
   return {
     from: validateBlockByNumber(from, program.to),
     to: program.to,
-    addresses: validateParamter(program.addresses, addressErrorMsg),
+    addresses: program.addresses,
     quickMode: validateBool(program.quick, quickModeErrorMsg),
     lastBlockNumberFilePath: saveState,
     nodeUrl: validateParamter(program.nodeUrl, rpcErrorMsg),
