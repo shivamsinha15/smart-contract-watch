@@ -132,7 +132,9 @@ Additionally Smart Contract Watch currently supports two output modes:
 
 example:
 
-  `yarn start -f 4240705 -a 0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724 -n "http://localhost:8545" -l "info" -q`
+  `yarn start -f 0 -t 132 -n "http://localhost:7545" -l "debug" -o json`
+
+   
 
 ### Tests
 `yarn test`
