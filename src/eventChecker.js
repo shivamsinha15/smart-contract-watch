@@ -1,6 +1,7 @@
 import logger from './logger';
 const chalk = require('chalk');
-const fetch = require('node-fetch');;
+const fetch = require('node-fetch');
+const _ = require('underscore');
 
 const postRequest = async (URL,postBody) => {
     return  fetch(URL, {
@@ -11,13 +12,21 @@ const postRequest = async (URL,postBody) => {
 }
 
 const DELAYED_UPDATE = 5000;
-const ENABLED_EVENTS = [   
-            'NEW_CAMPAIGN',
+const ENABLED_EVENTS = [
+            'NEW_CAMPAIGN', 
+            'STATE_CHANGE',   
             'VOTED', 
             'PARTICIPATED',
             'TRUST_DISBURSEMENT',
-            'STATE_CHANGE'
         ];
+
+const EVENT_ORDER_RANK = {
+    'NEW_CAMPAIGN': 1,
+    'STATE_CHANGE': 2, 
+    'VOTED': 3,
+    'PARTICIPATED': 4,
+    'TRUST_DISBURSEMENT': 5
+}
 
 export default async (data,instances) => {
 
@@ -30,7 +39,12 @@ export default async (data,instances) => {
             txHash: data.transaction.transactionHash,
         }
 
-        data.decodedLogs.forEach( log => {
+        let logs = _.sortBy(data.decodedLogs, (log) => {
+            return EVENT_ORDER_RANK[log.name]
+        });
+
+
+        for (const log of logs) {
             let name = log.name;
             console.log(chalk.red(">>>>><<><><><>><><><"))
             console.log(chalk.red(name));
@@ -46,6 +60,7 @@ export default async (data,instances) => {
 
             let postBody = { ...txObj };
                         
+            //reorder so that NEW+CA
             switch(name){
  
                 case 'NEW_CAMPAIGN':
@@ -54,7 +69,7 @@ export default async (data,instances) => {
                         postBody.campaignAddress = event.campaignAddress;
                         console.log(chalk.blue(JSON.stringify(postBody)));
                          setTimeout(
-                                () => postRequest('http://localhost:3000/api/sync/syncDBCampaignFromBlockchain',postBody),
+                                async () => await postRequest('http://localhost:3000/api/sync/syncDBCampaignFromBlockchain',postBody),
                                 DELAYED_UPDATE
                         ); 
                     break;
@@ -63,7 +78,7 @@ export default async (data,instances) => {
                         postBody.votedKey = event.votedKey;
                         console.log(chalk.blue(JSON.stringify(postBody)));
                         setTimeout(
-                            () => postRequest('http://localhost:3000/api/sync/syncDBVoteFromBlockchain',postBody),
+                            async () => await postRequest('http://localhost:3000/api/sync/syncDBVoteFromBlockchain',postBody),
                             DELAYED_UPDATE
                         ); 
 
@@ -73,7 +88,7 @@ export default async (data,instances) => {
                         postBody = { ...postBody, ...event}
                         console.log(chalk.blue(JSON.stringify(postBody)));
                         setTimeout(
-                            () => postRequest('http://localhost:3000/api/sync/syncDBParticipantFromBlockchain',postBody),
+                            async () => await  postRequest('http://localhost:3000/api/sync/syncDBParticipantFromBlockchain',postBody),
                             DELAYED_UPDATE
                         ); 
                     break;
@@ -82,7 +97,7 @@ export default async (data,instances) => {
                         postBody = { ...postBody, ...event}
                         console.log(chalk.blue(JSON.stringify(postBody)));
                         setTimeout(
-                            () => postRequest('http://localhost:3000/api/sync/synDBDisbursementFromBlockchain',postBody),
+                            async () => await postRequest('http://localhost:3000/api/sync/synDBDisbursementFromBlockchain',postBody),
                             DELAYED_UPDATE
                         ); 
                 case 'STATE_CHANGE':
@@ -90,7 +105,7 @@ export default async (data,instances) => {
                     postBody = { ...postBody, ...event}
                     console.log(chalk.blue(JSON.stringify(postBody)));
                     setTimeout(
-                        () => postRequest('http://localhost:3000/api/sync/synDBCampaignStateChangeFromBlockchain',postBody),
+                        async () => await postRequest('http://localhost:3000/api/sync/synDBCampaignStateChangeFromBlockchain',postBody),
                         DELAYED_UPDATE
                     );                        
                     break;
@@ -98,7 +113,7 @@ export default async (data,instances) => {
                     console.log(chalk.red(`EVENT NOT HANDLED: ${name}`));
             }
 
-        })
+        }
     }
 
     logger.log('info','eventChecker: <<<<<<<<<<<<<<<<<<<<<<<<<');
