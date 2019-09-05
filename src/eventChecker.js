@@ -15,7 +15,8 @@ const ENABLED_EVENTS = [
             'NEW_CAMPAIGN',
             'VOTED', 
             'PARTICIPATED',
-            'TRUST_DISBURSEMENT'
+            'TRUST_DISBURSEMENT',
+            'STATE_CHANGE'
         ];
 
 export default async (data,instances) => {
@@ -75,7 +76,7 @@ export default async (data,instances) => {
                             () => postRequest('http://localhost:3000/api/sync/syncDBParticipantFromBlockchain',postBody),
                             DELAYED_UPDATE
                         ); 
-
+                    break;
                 case 'TRUST_DISBURSEMENT':
                         console.log(chalk.green("TRUST_DISBURSEMENT:"));
                         postBody = { ...postBody, ...event}
@@ -84,7 +85,14 @@ export default async (data,instances) => {
                             () => postRequest('http://localhost:3000/api/sync/synDBDisbursementFromBlockchain',postBody),
                             DELAYED_UPDATE
                         ); 
-
+                case 'STATE_CHANGE':
+                    console.log(chalk.green("STATE_CHANGE:"));
+                    postBody = { ...postBody, ...event}
+                    console.log(chalk.blue(JSON.stringify(postBody)));
+                    setTimeout(
+                        () => postRequest('http://localhost:3000/api/sync/synDBCampaignStateChangeFromBlockchain',postBody),
+                        DELAYED_UPDATE
+                    );                        
                     break;
                 default:
                     console.log(chalk.red(`EVENT NOT HANDLED: ${name}`));
