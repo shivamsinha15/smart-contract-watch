@@ -1,14 +1,14 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn add dotenv-flow
+  /Users/shivamsinha/.nvm/versions/node/v9.11.2/bin/node /usr/local/bin/yarn
 
 PATH: 
-  /opt/local/bin:/opt/local/sbin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5/bin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5@global/bin:/Users/shivamsinha/.rvm/rubies/ruby-2.1.5/bin:/Users/shivamsinha/Desktop/Programming/workspace/gCloud/google-cloud-sdk/bin:/Users/shivamsinha/Desktop/Programming/nosql/mongodb-osx-x86_64-2.6.7/bin:/Users/shivamsinha/Desktop/Programming/gradle-3.3/bin:/Users/shivamsinha/Desktop/Programming/tomcat:/usr/local/Cellar/maven/3.2.3:/usr/local/Cellar/maven/3.2.3/bin:/usr/local/bin:/Users/shivamsinha/Desktop/Programming/rabbitmq_server-3.7.9/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/shivamsinha/anaconda3/bin:/Users/shivamsinha/anaconda3/condabin:/opt/local/bin:/opt/local/sbin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5/bin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5@global/bin:/Users/shivamsinha/.rvm/rubies/ruby-2.1.5/bin:/Users/shivamsinha/.sdkman/candidates/gradle/current/bin:/Users/shivamsinha/Desktop/Programming/workspace/gCloud/google-cloud-sdk/bin:/Users/shivamsinha/Desktop/Programming/nosql/mongodb-osx-x86_64-2.6.7/bin:/Users/shivamsinha/Desktop/Programming/gradle-3.3/bin:/Users/shivamsinha/Desktop/Programming/tomcat:/usr/local/Cellar/maven/3.2.3:/usr/local/Cellar/maven/3.2.3/bin:/Users/shivamsinha/Desktop/Programming/rabbitmq_server-3.7.9/sbin:/Users/shivamsinha/.rvm/bin::/Users/shivamsinha/.rvm/bin
+  /opt/local/bin:/opt/local/sbin:/Users/shivamsinha/.nvm/versions/node/v9.11.2/bin:/Users/shivamsinha/Desktop/Programming/workspace/gCloud/google-cloud-sdk/bin:/Users/shivamsinha/Desktop/Programming/nosql/mongodb-osx-x86_64-2.6.7/bin:/Users/shivamsinha/Desktop/Programming/gradle-3.3/bin:/Users/shivamsinha/Desktop/Programming/tomcat:/usr/local/Cellar/maven/3.2.3:/usr/local/Cellar/maven/3.2.3/bin:/usr/local/bin:/Users/shivamsinha/Desktop/Programming/rabbitmq_server-3.7.9/sbin:/opt/local/bin:/opt/local/sbin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5/bin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5@global/bin:/Users/shivamsinha/.rvm/rubies/ruby-2.1.5/bin:/Users/shivamsinha/Desktop/Programming/workspace/gCloud/google-cloud-sdk/bin:/Users/shivamsinha/Desktop/Programming/nosql/mongodb-osx-x86_64-2.6.7/bin:/Users/shivamsinha/Desktop/Programming/gradle-3.3/bin:/Users/shivamsinha/Desktop/Programming/tomcat:/usr/local/Cellar/maven/3.2.3:/usr/local/Cellar/maven/3.2.3/bin:/usr/local/bin:/Users/shivamsinha/Desktop/Programming/rabbitmq_server-3.7.9/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/shivamsinha/anaconda3/bin:/Users/shivamsinha/anaconda3/condabin:/opt/local/bin:/opt/local/sbin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5/bin:/Users/shivamsinha/.rvm/gems/ruby-2.1.5@global/bin:/Users/shivamsinha/.rvm/rubies/ruby-2.1.5/bin:/Users/shivamsinha/.sdkman/candidates/gradle/current/bin:/Users/shivamsinha/Desktop/Programming/workspace/gCloud/google-cloud-sdk/bin:/Users/shivamsinha/Desktop/Programming/nosql/mongodb-osx-x86_64-2.6.7/bin:/Users/shivamsinha/Desktop/Programming/gradle-3.3/bin:/Users/shivamsinha/Desktop/Programming/tomcat:/usr/local/Cellar/maven/3.2.3:/usr/local/Cellar/maven/3.2.3/bin:/Users/shivamsinha/Desktop/Programming/rabbitmq_server-3.7.9/sbin:/Users/shivamsinha/.rvm/bin::/Users/shivamsinha/.rvm/bin::/Users/shivamsinha/.rvm/bin
 
 Yarn version: 
   1.9.4
 
 Node version: 
-  10.13.0
+  9.11.2
 
 Platform: 
   darwin x64
@@ -60,7 +60,8 @@ npm manifest:
       "dotenv-flow": "^3.0.0",
       "request": "^2.82.0",
       "request-promise": "^4.2.1",
-      "smart-contract-loader": "^1.0.1",
+      "smart-contract-loader": "^1.0.5",
+      "underscore": "^1.9.1",
       "web3": "0.19.0",
       "winston": "2.3.1",
       "yamljs": "^0.3.0"
@@ -4810,9 +4811,9 @@ Lockfile:
     version "1.1.6"
     resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
   
-  smart-contract-loader@^1.0.1:
-    version "1.0.1"
-    resolved "https://registry.yarnpkg.com/smart-contract-loader/-/smart-contract-loader-1.0.1.tgz#326a03585ef6481bceb4630c5215f30004d3d5c3"
+  smart-contract-loader@^1.0.5:
+    version "1.0.5"
+    resolved "https://registry.yarnpkg.com/smart-contract-loader/-/smart-contract-loader-1.0.5.tgz#68e5776cea82ec4074fcd66fb2552d378f8cad67"
     dependencies:
       abi-decoder "^2.0.1"
       cross-env "^5.2.0"
@@ -5312,7 +5313,7 @@ Lockfile:
     version "1.8.3"
     resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
   
-  underscore@1.9.1:
+  underscore@1.9.1, underscore@^1.9.1:
     version "1.9.1"
     resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
   

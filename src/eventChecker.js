@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const _ = require('underscore');
 
 const postRequest = async (URL,postBody) => {
-    return  fetch(URL, {
+    return await fetch(URL, {
         method: 'post',
         body:    JSON.stringify(postBody),
         headers: { 'Content-Type': 'application/json' },
