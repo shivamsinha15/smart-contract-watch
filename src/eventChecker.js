@@ -11,10 +11,39 @@ const postRequest = async (URL,postBody) => {
     });
 }
 
+
+const timeoutAsync = async (ms) =>{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const promiseResolve = (resolve) => { fetch(url, {
+    method: 'post',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },   
+}).then(resolve()) };
+
+const fetchPromise = (url, body) => { 
+    return () => new Promise( (resolve) => { 
+                fetch('http://localhost:3000/api/sync/'+url,
+                {
+                    method: 'post',
+                    body: JSON.stringify(body),
+                    headers: { 'Content-Type': 'application/json' },   
+                 }).then(
+                     () => {
+                        console.log(chalk.red("CALLED: ...." + url));
+                        console.log(chalk.red("POST BODY..." + JSON.stringify(body)))
+                     }
+                 ).catch( (e) => {
+                    console.log(chalk.red("ERRORR: ...." + e));
+                 })
+        });     
+}
+
 const DELAYED_UPDATE = 5000;
 const ENABLED_EVENTS = [
             'NEW_CAMPAIGN', 
-            'STATE_CHANGE',   
+            'STATE_CHANGE',
             'VOTED', 
             'PARTICIPATED',
             'TRUST_DISBURSEMENT',
@@ -27,6 +56,14 @@ const EVENT_ORDER_RANK = {
     'PARTICIPATED': 4,
     'TRUST_DISBURSEMENT': 5
 }
+
+
+const setAsyncTimeout = (cb, timeout = 0) => new Promise(resolve => {
+    setTimeout(() => {
+        cb();
+        resolve();
+    }, timeout);
+});
 
 export default async (data,instances) => {
 
@@ -43,15 +80,31 @@ export default async (data,instances) => {
             return EVENT_ORDER_RANK[log.name]
         });
 
+        if(logs.length > 1){
+            console.log(chalk.blue("Checking LOG Contents>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"))
+            console.log(JSON.stringify(logs));
+        }
+        console.log()
 
+        let promisesFunctions = [];
         for (const log of logs) {
             let name = log.name;
+            let seed =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            if(log.length > 1){
+                console.log(chalk.blue("GUNIT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"))
+                console.log(JSON.stringify(log));
+            }
+            console.log(chalk.blue("START PROCESSING:",name));
+            if(!ENABLED_EVENTS.includes(name)) {
+                console.log(chalk.blue("NOT ENABLED PROCESSING:",name));
+                continue;
+            }
+
+
             console.log(chalk.red(">>>>><<><><><>><><><"))
             console.log(chalk.red(name));
             console.log(chalk.red(">>>>><<><><><>><><><"))
-            if(!ENABLED_EVENTS.includes(name)) {
-                return;
-            }
+
             let event =  log.events.reduce((acc,event) => 
                                             {  
                                                 acc[event.name] = event.value;
@@ -60,67 +113,67 @@ export default async (data,instances) => {
 
             let postBody = { ...txObj };
                         
-            //reorder so that NEW+CA
+        try {
             switch(name){
  
                 case 'NEW_CAMPAIGN':
-                        console.log(chalk.green("NEW_CAMPAIGN:"));
-                        console.log(chalk.blue(JSON.stringify(event)));              
+                        console.log(chalk.green("NEW_CAMPAIGN:"));          
                         postBody.campaignAddress = event.campaignAddress;
-                        console.log(chalk.blue(JSON.stringify(postBody)));
-                         setTimeout(
-                                async () => await postRequest('http://localhost:3000/api/sync/syncDBCampaignFromBlockchain',postBody),
-                                DELAYED_UPDATE
-                        ); 
+                        console.log(chalk.yellow("POST BODY",JSON.stringify(postBody)));
+                        promisesFunctions.push(fetchPromise('syncDBCampaignFromBlockchain',postBody));
                     break;
                 case 'VOTED':
                         console.log(chalk.green("VOTED:"));
                         postBody.votedKey = event.votedKey;
-                        console.log(chalk.blue(JSON.stringify(postBody)));
-                        setTimeout(
-                            async () => await postRequest('http://localhost:3000/api/sync/syncDBVoteFromBlockchain',postBody),
-                            DELAYED_UPDATE
-                        ); 
-
+                        console.log(chalk.yellow(JSON.stringify(postBody)));
+                        promisesFunctions.push(fetchPromise('syncDBVoteFromBlockchain',postBody));
                     break;
                 case 'PARTICIPATED':
                         console.log(chalk.green("PARTICIPATED:"));
                         postBody = { ...postBody, ...event}
-                        console.log(chalk.blue(JSON.stringify(postBody)));
-                        setTimeout(
-                            async () => await  postRequest('http://localhost:3000/api/sync/syncDBParticipantFromBlockchain',postBody),
-                            DELAYED_UPDATE
-                        ); 
+                        console.log(chalk.yellow(JSON.stringify(postBody)));
+                        promisesFunctions.push(fetchPromise('syncDBParticipantFromBlockchain',postBody));
                     break;
                 case 'TRUST_DISBURSEMENT':
                         console.log(chalk.green("TRUST_DISBURSEMENT:"));
                         postBody = { ...postBody, ...event}
-                        console.log(chalk.blue(JSON.stringify(postBody)));
-                        setTimeout(
-                            async () => await postRequest('http://localhost:3000/api/sync/synDBDisbursementFromBlockchain',postBody),
-                            DELAYED_UPDATE
-                        ); 
+                        console.log(chalk.yellow(JSON.stringify(postBody)));
+                        promisesFunctions.push(fetchPromise('synDBDisbursementFromBlockchain',postBody));
+                    break;
                 case 'STATE_CHANGE':
                     console.log(chalk.green("STATE_CHANGE:"));
                     postBody = { ...postBody, ...event}
-                    console.log(chalk.blue(JSON.stringify(postBody)));
-                    setTimeout(
-                        async () => await postRequest('http://localhost:3000/api/sync/synDBCampaignStateChangeFromBlockchain',postBody),
-                        DELAYED_UPDATE
-                    );                        
+                    console.log(chalk.yellow(JSON.stringify(postBody)));
+                    promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
                     break;
                 default:
                     console.log(chalk.red(`EVENT NOT HANDLED: ${name}`));
             }
 
+        } catch (e)  {
+            console.log("EEORORORORO",e)
         }
-    }
+    } //End Of For Loop
+
+            
+
+    //Guarantees calls in sequential order
+    for (let promiseFunction of promisesFunctions) {
+        await setAsyncTimeout(() => { promiseFunction()  }, DELAYED_UPDATE);
+        }
 
     logger.log('info','eventChecker: <<<<<<<<<<<<<<<<<<<<<<<<<');
 }
 
 
+}
 
+
+/* await setAsyncTimeout(() => {
+    // Do stuff
+}, 1000);
+
+ */
 
 /*
 DATA
