@@ -24,7 +24,7 @@ const promiseResolve = (resolve) => { fetch(url, {
 
 const fetchPromise = (url, body) => { 
     return () => new Promise( (resolve) => { 
-                fetch('http://localhost:3000/api/sync/'+url,
+                fetch('http://localhost:3001/api/sync/'+url,
                 {
                     method: 'post',
                     body: JSON.stringify(body),
@@ -46,7 +46,7 @@ const ENABLED_EVENTS = [
             'STATE_CHANGE',
             'VOTED', 
             'PARTICIPATED',
-            'TRUST_DISBURSEMENT',
+            'DISBURSEMENT',
         ];
 
 const EVENT_ORDER_RANK = {
@@ -54,7 +54,7 @@ const EVENT_ORDER_RANK = {
     'STATE_CHANGE': 2, 
     'VOTED': 3,
     'PARTICIPATED': 4,
-    'TRUST_DISBURSEMENT': 5
+    'DISBURSEMENT': 5
 }
 
 
@@ -84,16 +84,13 @@ export default async (data,instances) => {
             console.log(chalk.blue("Checking LOG Contents>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"))
             console.log(JSON.stringify(logs));
         }
-        console.log()
+
 
         let promisesFunctions = [];
         for (const log of logs) {
             let name = log.name;
             let seed =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            if(log.length > 1){
-                console.log(chalk.blue("GUNIT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"))
-                console.log(JSON.stringify(log));
-            }
+
             console.log(chalk.blue("START PROCESSING:",name));
             if(!ENABLED_EVENTS.includes(name)) {
                 console.log(chalk.blue("NOT ENABLED PROCESSING:",name));
@@ -134,11 +131,23 @@ export default async (data,instances) => {
                         console.log(chalk.yellow(JSON.stringify(postBody)));
                         promisesFunctions.push(fetchPromise('syncDBParticipantFromBlockchain',postBody));
                     break;
-                case 'TRUST_DISBURSEMENT':
+                case 'DISBURSEMENT':
                         console.log(chalk.green("TRUST_DISBURSEMENT:"));
                         postBody = { ...postBody, ...event}
                         console.log(chalk.yellow(JSON.stringify(postBody)));
                         promisesFunctions.push(fetchPromise('synDBDisbursementFromBlockchain',postBody));
+                    /*  
+                        {
+                            "blockNumber": "137",
+                            "from": "0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248",
+                            "to": "0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248",
+                            "txHash": "0xe32524dfee86dd6e8815ead6b90a0ea2aae2a43d1140d987a8637a849faca6fc",
+                            "disbursementId": "0x7f5b46b480cdd824afb432c18e1e008f3218606704b0e70dde99f9e6b8a1a16d",
+                            "allocationType": "0",
+                            "campaign": "0xe94c9a3b960f9a34568d3898e68b33f4694718da",
+                            "amount": "1"
+                          }
+                    */
                     break;
                 case 'STATE_CHANGE':
                     console.log(chalk.green("STATE_CHANGE:"));
