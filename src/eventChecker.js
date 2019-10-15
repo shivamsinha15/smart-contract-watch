@@ -42,11 +42,13 @@ const fetchPromise = (url, body) => {
 
 const DELAYED_UPDATE = 5000;
 const ENABLED_EVENTS = [
-            'NEW_CAMPAIGN', 
+           'NEW_CAMPAIGN', 
             'STATE_CHANGE',
             'VOTED', 
             'PARTICIPATED',
-            'DISBURSEMENT',
+            'DISBURSEMENT', 
+            'SLASHED', 
+            'UPDATED_PERIOD',
         ];
 
 const EVENT_ORDER_RANK = {
@@ -54,7 +56,9 @@ const EVENT_ORDER_RANK = {
     'STATE_CHANGE': 2, 
     'VOTED': 3,
     'PARTICIPATED': 4,
-    'DISBURSEMENT': 5
+    'DISBURSEMENT': 5,
+    'UPDATED_PERIOD': 6,
+    'SLASHED': 7
 }
 
 
@@ -155,6 +159,40 @@ export default async (data,instances) => {
                     console.log(chalk.yellow(JSON.stringify(postBody)));
                     promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
                     break;
+                case 'UPDATED_PERIOD':
+                    console.log(chalk.green("UPDATED_PERIOD:"));
+                    postBody = { ...postBody, ...event}
+                    promisesFunctions.push(fetchPromise('syncUpdatePeriod',postBody));    
+                /*
+                    { 
+                        blockNumber: 124,
+                        from: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
+                        to: '0x1713cce89d309e06e5dddff3442ca0084fc5a0fd',
+                        txHash:
+                        '0x434bee05ce381aab42aba8124e928869f5f92961fa88d86f9e27e2d429494dcf',
+                        newPeriod: '3'    
+                    }
+                */
+                    break;
+                case 'SLASHED':
+                    console.log(chalk.green("SLASHED"));
+                    postBody = { ...postBody, ...event}
+                    promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
+                    break;
+                /* 
+                    {   
+                        blockNumber: '125',
+                        from: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
+                        to: '0x1713cce89d309e06e5dddff3442ca0084fc5a0fd',
+                        txHash:'0xf60deb23745be91d8deb3ba6d11a3547f2d7627677806e7f3802ea7521f1aad9',
+                        member: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
+                        amount: BigNumber { s: 1, e: 1, c: [ 10 ] },
+                        actual: BigNumber { s: 1, e: 0, c: [ 3 ] },
+                        excepted: BigNumber { s: 1, e: 0, c: [ 4 ] },
+                        diff: BigNumber { s: 1, e: 0, c: [ 1 ] },
+                        period: '3'
+                    }
+             */
                 default:
                     console.log(chalk.red(`EVENT NOT HANDLED: ${name}`));
             }
