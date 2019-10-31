@@ -24,7 +24,7 @@ const promiseResolve = (resolve) => { fetch(url, {
 
 const fetchPromise = (url, body) => { 
     return () => new Promise( (resolve) => { 
-                fetch('http://localhost:3001/api/sync/'+url,
+                fetch(process.env.CK_SERVER_URL + url,
                 {
                     method: 'post',
                     body: JSON.stringify(body),
@@ -42,13 +42,14 @@ const fetchPromise = (url, body) => {
 
 const DELAYED_UPDATE = 5000;
 const ENABLED_EVENTS = [
-           'NEW_CAMPAIGN', 
-            'STATE_CHANGE',
+             'NEW_CAMPAIGN',
+            'STATE_CHANGE', 
             'VOTED', 
-            'PARTICIPATED',
             'DISBURSEMENT', 
             'SLASHED', 
-            'UPDATED_PERIOD',
+            'UPDATED_PERIOD',  
+            'PARTICIPATED', 
+            'UPDATED_PERIOD',  
         ];
 
 const EVENT_ORDER_RANK = {
@@ -177,6 +178,7 @@ export default async (data,instances) => {
                 case 'SLASHED':
                     console.log(chalk.green("SLASHED"));
                     postBody = { ...postBody, ...event}
+                    console.log(chalk.yellow(JSON.stringify(postBody)));
                     promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
                     break;
                 /* 
