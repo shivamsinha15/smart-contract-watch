@@ -40,16 +40,17 @@ const fetchPromise = (url, body) => {
         });     
 }
 
-const DELAYED_UPDATE = 5000;
+const DELAYED_UPDATE = 2000;
+const SEND_REQUEST = true;
 const ENABLED_EVENTS = [
-             'NEW_CAMPAIGN',
+            'NEW_CAMPAIGN',
             'STATE_CHANGE', 
             'VOTED', 
             'DISBURSEMENT', 
             'SLASHED', 
-            'UPDATED_PERIOD',  
+            'UPDATED_PERIOD',   
             'PARTICIPATED', 
-            'UPDATED_PERIOD',  
+           // 'UPDATED_PERIOD',  
         ];
 
 const EVENT_ORDER_RANK = {
@@ -122,26 +123,36 @@ export default async (data,instances) => {
                         console.log(chalk.green("NEW_CAMPAIGN:"));          
                         postBody.campaignAddress = event.campaignAddress;
                         console.log(chalk.yellow("POST BODY",JSON.stringify(postBody)));
-                        promisesFunctions.push(fetchPromise('syncDBCampaignFromBlockchain',postBody));
-                    break;
+                        if(SEND_REQUEST){
+                            promisesFunctions.push(fetchPromise('syncDBCampaignFromBlockchain',postBody));
+                        }
+                        break;
                 case 'VOTED':
                         console.log(chalk.green("VOTED:"));
                         postBody.votedKey = event.votedKey;
                         console.log(chalk.yellow(JSON.stringify(postBody)));
-                        promisesFunctions.push(fetchPromise('syncDBVoteFromBlockchain',postBody));
+                        if(SEND_REQUEST){
+                            promisesFunctions.push(fetchPromise('syncDBVoteFromBlockchain',postBody));
+                        }
                     break;
                 case 'PARTICIPATED':
                         console.log(chalk.green("PARTICIPATED:"));
                         postBody = { ...postBody, ...event}
+                        postBody.action = 'PARTICIPATED'
                         console.log(chalk.yellow(JSON.stringify(postBody)));
-                        promisesFunctions.push(fetchPromise('syncDBParticipantFromBlockchain',postBody));
-                    break;
+                        if(SEND_REQUEST){
+                            promisesFunctions.push(fetchPromise('syncDBParticipantFromBlockchain',postBody));
+                        }
+                        break;
                 case 'DISBURSEMENT':
                         console.log(chalk.green("TRUST_DISBURSEMENT:"));
                         postBody = { ...postBody, ...event}
+                        postBody.action = 'DISBURSEMENT'
                         console.log(chalk.yellow(JSON.stringify(postBody)));
-                        promisesFunctions.push(fetchPromise('synDBDisbursementFromBlockchain',postBody));
-                    /*  
+                        if(SEND_REQUEST){
+                         promisesFunctions.push(fetchPromise('synDBDisbursementFromBlockchain',postBody));
+                        }
+                         /*  
                         {
                             "blockNumber": "137",
                             "from": "0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248",
@@ -157,13 +168,19 @@ export default async (data,instances) => {
                 case 'STATE_CHANGE':
                     console.log(chalk.green("STATE_CHANGE:"));
                     postBody = { ...postBody, ...event}
+                    postBody.action = 'STATE_CHANGE'
                     console.log(chalk.yellow(JSON.stringify(postBody)));
-                    promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
+                    if(SEND_REQUEST){
+                        promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
+                    }
                     break;
                 case 'UPDATED_PERIOD':
                     console.log(chalk.green("UPDATED_PERIOD:"));
                     postBody = { ...postBody, ...event}
-                    promisesFunctions.push(fetchPromise('syncUpdatePeriod',postBody));    
+                    postBody.action = 'UPDATED_PERIOD'
+                    if(SEND_REQUEST){
+                        promisesFunctions.push(fetchPromise('syncUpdatePeriod',postBody));    
+                    }
                 /*
                     { 
                         blockNumber: 124,
@@ -179,8 +196,10 @@ export default async (data,instances) => {
                     console.log(chalk.green("SLASHED"));
                     postBody = { ...postBody, ...event}
                     console.log(chalk.yellow(JSON.stringify(postBody)));
-                    promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
-                    break;
+                    if(SEND_REQUEST){
+                     promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
+                    }
+                     break;
                 /* 
                     {   
                         blockNumber: '125',
