@@ -1,5 +1,18 @@
-import winston from 'winston';
+const { createLogger, format, transports } = require('winston');
 import { getCommandVars } from './command';
+const fs = require('fs');
+const path = require('path');
+
+
+const env = process.env.NODE_ENV || 'development';
+const logDir = process.env.LOG_DIR;
+
+const filename = path.join(logDir, 'results.log');
+
+// Create the log directory if it does not exist
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
 
 const loggerConsoleOptions = {
   timestamp: false,
@@ -7,9 +20,40 @@ const loggerConsoleOptions = {
   formatter: options => `${options.message}`,
 };
 
-const logger = new (winston.Logger)({
+
+const parseLogAttributes = format(info => {
+  if(info.message){
+    let splitMessage = info.message.split(',');
+    for (let i = 0; i < splitMessage.length; i++) {
+        let keyValue = splitMessage[i].split('=')
+        if(keyValue.length == 2){
+        let key = keyValue[0];
+          info[key] = keyValue[1]; 
+      }
+    }
+  }
+  return info;
+});
+
+
+const logger = createLogger({
+  level: env === 'production' ? 'info' : 'debug',
   transports: [
-    new (winston.transports.Console)(loggerConsoleOptions),
+    new transports.Console({
+      format: format.combine(
+        format.printf((info) => {
+          return `${info.message}`;
+        })
+      )
+    }),  
+       new transports.File({
+      filename,
+      format: format.combine(
+        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        parseLogAttributes(),
+        format.json()
+      )
+    }) 
   ] });
 
 
@@ -18,7 +62,7 @@ const logger = new (winston.Logger)({
 * @param {string}
 */
 export const setLoggerLevel = (logLevel) => {
-  logger.transports.console.level = logLevel;
+  logger.level = logLevel;
 };
 /**
  * This will print out the error as json formatted

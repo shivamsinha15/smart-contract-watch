@@ -16,7 +16,7 @@ const defaultLogLevel = 'info';
 const defaultStartBlock = 0;
 const defaultQuickMode = false;
 const defaultSaveState = null;
-const defaultOutputType = 'terminal';
+const defaultOutputType = 'graylog';
 const defaultAccessToken = '';
 const defaultBlockConfirmations = '0';
 

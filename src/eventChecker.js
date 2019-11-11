@@ -1,4 +1,4 @@
-import logger from './logger';
+import logger, { logError } from './logger';
 const chalk = require('chalk');
 const fetch = require('node-fetch');
 const _ = require('underscore');
@@ -31,11 +31,10 @@ const fetchPromise = (url, body) => {
                     headers: { 'Content-Type': 'application/json' },   
                  }).then(
                      () => {
-                        console.log(chalk.red("CALLED: ...." + url));
-                        console.log(chalk.red("POST BODY..." + JSON.stringify(body)))
+                        logger.info(`processId=${body.processId},event=SUCCESS_POST,url=${url}`)                        
                      }
                  ).catch( (e) => {
-                    console.log(chalk.red("ERRORR: ...." + e));
+                    logger.error(`processId=${body.processId},event=ERROR_POST,url=${url}`)    
                  })
         });     
 }
@@ -50,7 +49,7 @@ const ENABLED_EVENTS = [
             'SLASHED', 
             'UPDATED_PERIOD',   
             'PARTICIPATED', 
-           // 'UPDATED_PERIOD',  
+            'UPDATED_PERIOD',  
         ];
 
 const EVENT_ORDER_RANK = {
@@ -71,42 +70,40 @@ const setAsyncTimeout = (cb, timeout = 0) => new Promise(resolve => {
     }, timeout);
 });
 
+const logEvent = (eventName,payload) => {
+    logger.info(`processId=${payload.processId},event=${eventName},block_number=${payload.blockNumber},tx_hash=${payload.txHash},from=${payload.from},to=${payload.to},payload=${JSON.stringify(payload)}`);
+}
+
+const getRandomString = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 export default async (data,instances) => {
 
     if(data.decodedLogs){
-        
         let txObj  = {
             blockNumber: data.transaction.blockNumber,
             from: data.transaction.from,
             to: data.transaction.to,
             txHash: data.transaction.transactionHash,
+            processId: getRandomString()
         }
 
         let logs = _.sortBy(data.decodedLogs, (log) => {
             return EVENT_ORDER_RANK[log.name]
         });
 
-        if(logs.length > 1){
-            console.log(chalk.blue("Checking LOG Contents>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"))
-            console.log(JSON.stringify(logs));
-        }
 
 
         let promisesFunctions = [];
         for (const log of logs) {
             let name = log.name;
-            let seed =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            
 
-            console.log(chalk.blue("START PROCESSING:",name));
             if(!ENABLED_EVENTS.includes(name)) {
-                console.log(chalk.blue("NOT ENABLED PROCESSING:",name));
+                logger.info(`disabled_event=${name}`)
                 continue;
             }
-
-
-            console.log(chalk.red(">>>>><<><><><>><><><"))
-            console.log(chalk.red(name));
-            console.log(chalk.red(">>>>><<><><><>><><><"))
 
             let event =  log.events.reduce((acc,event) => 
                                             {  
@@ -118,108 +115,56 @@ export default async (data,instances) => {
                         
         try {
             switch(name){
- 
-                case 'NEW_CAMPAIGN':
-                        console.log(chalk.green("NEW_CAMPAIGN:"));          
+                
+                case 'NEW_CAMPAIGN':      
                         postBody.campaignAddress = event.campaignAddress;
-                        console.log(chalk.yellow("POST BODY",JSON.stringify(postBody)));
                         if(SEND_REQUEST){
                             promisesFunctions.push(fetchPromise('syncDBCampaignFromBlockchain',postBody));
                         }
                         break;
                 case 'VOTED':
-                        console.log(chalk.green("VOTED:"));
                         postBody.votedKey = event.votedKey;
-                        console.log(chalk.yellow(JSON.stringify(postBody)));
                         if(SEND_REQUEST){
                             promisesFunctions.push(fetchPromise('syncDBVoteFromBlockchain',postBody));
                         }
                     break;
                 case 'PARTICIPATED':
-                        console.log(chalk.green("PARTICIPATED:"));
                         postBody = { ...postBody, ...event}
-                        postBody.action = 'PARTICIPATED'
-                        console.log(chalk.yellow(JSON.stringify(postBody)));
                         if(SEND_REQUEST){
                             promisesFunctions.push(fetchPromise('syncDBParticipantFromBlockchain',postBody));
                         }
                         break;
                 case 'DISBURSEMENT':
-                        console.log(chalk.green("TRUST_DISBURSEMENT:"));
                         postBody = { ...postBody, ...event}
-                        postBody.action = 'DISBURSEMENT'
-                        console.log(chalk.yellow(JSON.stringify(postBody)));
                         if(SEND_REQUEST){
                          promisesFunctions.push(fetchPromise('synDBDisbursementFromBlockchain',postBody));
                         }
-                         /*  
-                        {
-                            "blockNumber": "137",
-                            "from": "0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248",
-                            "to": "0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248",
-                            "txHash": "0xe32524dfee86dd6e8815ead6b90a0ea2aae2a43d1140d987a8637a849faca6fc",
-                            "disbursementId": "0x7f5b46b480cdd824afb432c18e1e008f3218606704b0e70dde99f9e6b8a1a16d",
-                            "allocationType": "0",
-                            "campaign": "0xe94c9a3b960f9a34568d3898e68b33f4694718da",
-                            "amount": "1"
-                          }
-                    */
                     break;
                 case 'STATE_CHANGE':
-                    console.log(chalk.green("STATE_CHANGE:"));
-                    postBody = { ...postBody, ...event}
-                    postBody.action = 'STATE_CHANGE'
-                    console.log(chalk.yellow(JSON.stringify(postBody)));
-                    if(SEND_REQUEST){
-                        promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
-                    }
-                    break;
+                        postBody = { ...postBody, ...event}
+                        if(SEND_REQUEST){
+                            promisesFunctions.push(fetchPromise('synDBCampaignStateChangeFromBlockchain',postBody));           
+                        }
+                        break;
                 case 'UPDATED_PERIOD':
-                    console.log(chalk.green("UPDATED_PERIOD:"));
-                    postBody = { ...postBody, ...event}
-                    postBody.action = 'UPDATED_PERIOD'
-                    if(SEND_REQUEST){
-                        promisesFunctions.push(fetchPromise('syncUpdatePeriod',postBody));    
-                    }
-                /*
-                    { 
-                        blockNumber: 124,
-                        from: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
-                        to: '0x1713cce89d309e06e5dddff3442ca0084fc5a0fd',
-                        txHash:
-                        '0x434bee05ce381aab42aba8124e928869f5f92961fa88d86f9e27e2d429494dcf',
-                        newPeriod: '3'    
-                    }
-                */
-                    break;
+                        postBody = { ...postBody, ...event}
+                        if(SEND_REQUEST){
+                            promisesFunctions.push(fetchPromise('syncUpdatePeriod',postBody));    
+                        }
+                        break;
                 case 'SLASHED':
-                    console.log(chalk.green("SLASHED"));
-                    postBody = { ...postBody, ...event}
-                    console.log(chalk.yellow(JSON.stringify(postBody)));
-                    if(SEND_REQUEST){
-                     promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
-                    }
-                     break;
-                /* 
-                    {   
-                        blockNumber: '125',
-                        from: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
-                        to: '0x1713cce89d309e06e5dddff3442ca0084fc5a0fd',
-                        txHash:'0xf60deb23745be91d8deb3ba6d11a3547f2d7627677806e7f3802ea7521f1aad9',
-                        member: '0x923d1a26b64ee3219f4b32dc4f2e6d550eec7248',
-                        amount: BigNumber { s: 1, e: 1, c: [ 10 ] },
-                        actual: BigNumber { s: 1, e: 0, c: [ 3 ] },
-                        excepted: BigNumber { s: 1, e: 0, c: [ 4 ] },
-                        diff: BigNumber { s: 1, e: 0, c: [ 1 ] },
-                        period: '3'
-                    }
-             */
+                        postBody = { ...postBody, ...event}
+                        if(SEND_REQUEST){
+                        promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
+                        }
+                        break;
                 default:
-                    console.log(chalk.red(`EVENT NOT HANDLED: ${name}`));
+                        logger.error(`EVENT NOT HANDLED: ${name}`)
             }
-
+            logEvent(name,postBody);
         } catch (e)  {
-            console.log("EEORORORORO",e)
+            logError(error,
+                `txHash: ${transaction.hash} ${error.message}`);
         }
     } //End Of For Loop
 
@@ -227,10 +172,9 @@ export default async (data,instances) => {
 
     //Guarantees calls in sequential order
     for (let promiseFunction of promisesFunctions) {
-        await setAsyncTimeout(() => { promiseFunction()  }, DELAYED_UPDATE);
+            await setAsyncTimeout(() => { promiseFunction()  }, DELAYED_UPDATE);
         }
 
-    logger.log('info','eventChecker: <<<<<<<<<<<<<<<<<<<<<<<<<');
 }
 
 

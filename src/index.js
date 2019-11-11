@@ -9,6 +9,7 @@ import output from './output';
 import eventChecker from './eventChecker';
 import { isContractCreationTransaction } from './utils';
 import { ContractManager } from 'smart-contract-loader';
+const chalk = require('chalk');
 
 const CAMPAIGN_LOAD_ABIS = new Set([
   "CampaignTrust",
@@ -51,7 +52,7 @@ let addressesObj = {};
 const transactionHandler = async (transaction, addresses) => {
   let decodedLogs = [];
   let decodedInputDataResult;
-  logger.debug(`Transaction To: ${transaction.to}`)
+  //logger.debug(`Transaction To: ${transaction.to}`)
   if (isContractCreationTransaction(transaction.to)) {
     return; //Right Now Does Nothing
     try {
@@ -64,20 +65,25 @@ const transactionHandler = async (transaction, addresses) => {
     }
   } else {
     try {
+
       decodedInputDataResult = addressAbiMap[transaction.to].decodeMethod(transaction.input);
     } catch (error) {
+
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
       return;
     }
     try {
+
       decodedLogs = transaction.logs.map((log) => {
         if (addresses.some(address => address === log.address)) {
           return addressAbiMap[log.address].decodeSingleLog(log);
         }
         return { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(log), type: 'logs' }] };
       });
+
     } catch (error) {
+
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
       return;
@@ -85,10 +91,8 @@ const transactionHandler = async (transaction, addresses) => {
   }
 
   let data = { transaction, decodedInputDataResult, decodedLogs }
-  let decodedTransaction  = await output(data, getCommandVars('outputType'));
-  console.log("index.js;EventChecker Start");
+  //let decodedTransaction  = await output(data, getCommandVars('outputType'));
   eventChecker(data,instances);
-  console.log("index.js;EventChecker End");
 };
 
 
@@ -99,7 +103,7 @@ const main = async () => {
   const { from, to, addresses, quickMode,
     lastBlockNumberFilePath, logLevel, blockConfirmations } = command();
   setLoggerLevel(logLevel);
-  logger.debug('Start process');
+  logger.debug('event=STARTED');
   await initializeContracts();
 
 

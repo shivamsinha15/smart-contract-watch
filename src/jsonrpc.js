@@ -6,6 +6,7 @@ import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
 import { isAddress } from './web3/utils';
 import { initCustomRPCs } from './web3/customRpc';
+const chalk = require('chalk');
 
 export const rpcErrorCatch = async (e) => {
   if (e.message.includes('Invalid JSON RPC response')) {
@@ -108,9 +109,9 @@ export default class JsonRpc {
    * @returns {Object} formatted string
    */
   async scanTransaction(txn) {
-    logger.debug("ScaningTransaction....");
+    //logger.debug("ScaningTransaction....");
     try {
-      logger.info("1")
+
 
       const txnReceipts =
       await this.getTransactionReceiptAsync(txn.hash).timeout(promiseTimeoutInMilliseconds);
@@ -121,12 +122,12 @@ export default class JsonRpc {
       if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
         throw new Error('Address you entered is not a smart contract');
       }
+   
 
-      logger.info("2")
 
       // If the smart contract received transaction or there's logs execute the callback function
       if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
-        logger.info("3")
+
         return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
       }
     } catch (e) {
@@ -143,6 +144,7 @@ export default class JsonRpc {
    * @param {object} block
    */
   async scanSlowMode(block) {
+  
     if (block && block.transactions && Array.isArray(block.transactions)) {
       const transactionsResult = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
@@ -151,13 +153,19 @@ export default class JsonRpc {
           const singleTransactionResult = await this.scanTransaction(txn);
           if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
         } catch (e) {
+
           await rpcErrorCatch(e);
         }
       }
-      logger.debug(`Number of transactions: ${transactionsResult.length}`);
+
+      if(transactionsResult && transactionsResult.length && transactionsResult.length > 0){
+        //logger.debug(`BLOCK_NUMBER=${this.currentBlock},TRANSACTION_LENGTH=${transactionsResult.length}`);
+      }
+     
 
       if (this.callback) {
         transactionsResult.forEach((txn) => {
+
           if (txn) {
             const queriedTxn = txn;
             // returned queries from older blocks have no networkId
@@ -165,8 +173,10 @@ export default class JsonRpc {
               queriedTxn.networkId = this.web3Instance.version.network;
             }
             try {
+  
               this.callback(queriedTxn, this.addresses);
             } catch (e) {
+
               rpcErrorCatch(e);
             }
           }
@@ -203,8 +213,8 @@ export default class JsonRpc {
     const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
-    console.log("blockTransactionsWithLogsList");
-    console.log(blockTransactionsWithLogsList);
+    //console.log("blockTransactionsWithLogsList");
+    //console.log(blockTransactionsWithLogsList);
     return;
     if (this.callback) {
       blockTransactionsWithLogsList.forEach((transaction) => {
@@ -228,6 +238,7 @@ export default class JsonRpc {
    * @see https://github.com/Neufund/smart-contract-watch#modes
    */
   async scanBlocks(isFastMode = false) {
+    //console.log(chalk.green("1:"))
     let lastBlockNumber = await this.getLastBlockWithOffset();
     validateBlockByNumber(this.currentBlock, lastBlockNumber);
     if (this.toBlock) {
@@ -236,7 +247,7 @@ export default class JsonRpc {
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
         if (this.currentBlock > lastBlockNumber) {
-          logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
+          //logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
           await bluebird.delay(waitingTimeInMilliseconds);
           lastBlockNumber = await this.getLastBlockWithOffset();
         } else {
@@ -249,7 +260,7 @@ export default class JsonRpc {
             await this.scanSlowMode(block);
           }
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
-          logger.debug(`Current block number is ${this.currentBlock}`);
+          //logger.debug(`Current block number is ${this.currentBlock}`);
 
           // @TODO: Move file writing outside of this module
           if (this.lastBlockNumberFilePath) {
