@@ -50,6 +50,7 @@ const ENABLED_EVENTS = [
             'UPDATED_PERIOD',   
             'PARTICIPATED', 
             'UPDATED_PERIOD',  
+            'SET_CAMPAIGN_WINNER'
         ];
 
 const EVENT_ORDER_RANK = {
@@ -59,7 +60,8 @@ const EVENT_ORDER_RANK = {
     'PARTICIPATED': 4,
     'DISBURSEMENT': 5,
     'UPDATED_PERIOD': 6,
-    'SLASHED': 7
+    'SLASHED': 7,
+    'SET_CAMPAIGN_WINNER': 8,
 }
 
 
@@ -158,6 +160,14 @@ export default async (data,instances) => {
                         promisesFunctions.push(fetchPromise('syncSlashedAmountFromBlockchain',postBody));    
                         }
                         break;
+                case 'SET_CAMPAIGN_WINNER':
+                        postBody = { ...postBody, ...event}
+                        console.log(postBody);
+                        console.log('SET_CAMPAIGN_WINNER')
+                        if(SEND_REQUEST){
+                        promisesFunctions.push(fetchPromise('syncSetCampaignManager',postBody));    
+                        } 
+                        break
                 default:
                         logger.error(`EVENT NOT HANDLED: ${name}`)
             }
