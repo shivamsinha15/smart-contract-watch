@@ -103,7 +103,7 @@ const main = async () => {
   const { from, to, addresses, quickMode,
     lastBlockNumberFilePath, logLevel, blockConfirmations } = command();
   setLoggerLevel(logLevel);
-  logger.debug('event=STARTED');
+  logger.info('event=STARTED');
   await initializeContracts();
 
 
