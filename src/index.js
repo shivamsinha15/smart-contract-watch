@@ -11,6 +11,17 @@ import { isContractCreationTransaction } from './utils';
 import { ContractManager } from 'smart-contract-loader';
 const chalk = require('chalk');
 
+const tracer = require('dd-trace').init(
+  {
+    service: process.env.SERVICE_NAME,
+  }
+)
+
+tracer.init({
+  analytics: true
+})
+
+
 const CAMPAIGN_LOAD_ABIS = new Set([
   "CampaignTrust",
   "PollingBooth",

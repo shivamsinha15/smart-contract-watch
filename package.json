@@ -37,6 +37,7 @@
     "bluebird": "^3.5.1",
     "chalk": "^2.4.2",
     "commander": "^2.11.0",
+    "dd-trace": "^0.16.1",
     "dotenv": "^4.0.0",
     "dotenv-flow": "^3.0.0",
     "mongoose": "^5.7.9",
