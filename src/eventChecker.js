@@ -119,10 +119,10 @@ export default async (data,instances) => {
             switch(name){
                 
                 case 'NEW_CAMPAIGN':      
-                        postBody.campaignAddress = event.campaignAddress;
+/*                         postBody.campaignAddress = event.campaignAddress;
                         if(SEND_REQUEST){
                             promisesFunctions.push(fetchPromise('syncDBCampaignFromBlockchain',postBody));
-                        }
+                        } */
                         break;
                 case 'VOTED':
                         postBody.votedKey = event.votedKey;
