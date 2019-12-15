@@ -1,16 +1,7 @@
 import logger, { logError } from './logger';
+import { fetchPromise } from './utils';
 const chalk = require('chalk');
-const fetch = require('node-fetch');
 const _ = require('underscore');
-
-const postRequest = async (URL,postBody) => {
-    return await fetch(URL, {
-        method: 'post',
-        body:    JSON.stringify(postBody),
-        headers: { 'Content-Type': 'application/json' },
-    });
-}
-
 
 const timeoutAsync = async (ms) =>{
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -22,22 +13,6 @@ const promiseResolve = (resolve) => { fetch(url, {
     headers: { 'Content-Type': 'application/json' },   
 }).then(resolve()) };
 
-const fetchPromise = (url, body) => { 
-    return () => new Promise( (resolve) => { 
-                fetch(process.env.CK_SERVER_URL + url,
-                {
-                    method: 'post',
-                    body: JSON.stringify(body),
-                    headers: { 'Content-Type': 'application/json' },   
-                 }).then(
-                     () => {
-                        logger.info(`processId=${body.processId},event=SUCCESS_POST,url=${url}`)                        
-                     }
-                 ).catch( (e) => {
-                    logger.error(`processId=${body.processId},event=ERROR_POST,url=${url}`)    
-                 })
-        });     
-}
 
 const DELAYED_UPDATE = 2000;
 const SEND_REQUEST = true;

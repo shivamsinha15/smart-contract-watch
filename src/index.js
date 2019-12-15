@@ -10,6 +10,9 @@ import eventChecker from './eventChecker';
 import { isContractCreationTransaction } from './utils';
 import { ContractManager } from 'smart-contract-loader';
 const chalk = require('chalk');
+var cron = require('node-cron');
+import { callFetch } from './utils';
+
 
 const tracer = require('dd-trace').init(
   {
@@ -111,6 +114,16 @@ const transactionHandler = async (transaction, addresses) => {
  * The main function that has the full steps
  */
 const main = async () => {
+
+  cron.schedule('0 20 * * *', async () => {
+     logger.info("Called Reminder Cron");
+     await callFetch('sendReminderNotification',{})
+  }, {
+    scheduled: true,
+    timezone: "America/Chicago"
+  });
+   
+   
   const { from, to, addresses, quickMode,
     lastBlockNumberFilePath, logLevel, blockConfirmations } = command();
   setLoggerLevel(logLevel);
@@ -145,6 +158,10 @@ const initializeContracts = async () => {
      addressesObj[address] = contracts[x].abi;
     });
 }
+
+
+
+
 
 
 

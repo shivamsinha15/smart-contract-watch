@@ -1,5 +1,44 @@
 import fs from 'fs';
 import { defaultBlockNumber } from './config';
+const fetch = require('node-fetch');
+import logger, { logError, setLoggerLevel } from './logger';
+
+
+export const fetchPromise = (url, body) => { 
+  return () => new Promise( (resolve) => { 
+              fetch(process.env.CK_SERVER_URL + url,
+              {
+                  method: 'post',
+                  body: JSON.stringify(body),
+                  headers: { 'Content-Type': 'application/json' },   
+               }).then(
+                   () => {
+                      logger.info(`processId=${body.processId},event=SUCCESS_POST,url=${url}`)                        
+                   }
+               ).catch( (e) => {
+                  logger.error(`processId=${body.processId},event=ERROR_POST,url=${url}`)    
+               })
+      });     
+}
+
+export const callFetch = (url,body) => {
+  return fetch(process.env.CK_SERVER_URL + url,
+    {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },   
+     }).then(
+         () => {
+            logger.info(`processId=${body.processId},event=SUCCESS_POST,url=${url}`)                        
+         }
+     ).catch( (e) => {
+        logger.error(`processId=${body.processId},event=ERROR_POST,url=${url}`)    
+     })
+}
+
+
+
+
 /**
  * @param Array array
  * @param bool element

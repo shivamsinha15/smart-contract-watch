@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "./node_modules/.bin/babel ./src --experimental --source-maps-inline -d ./dist",
-    "start": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist ",
+    "start": "nohup ./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist -f 598 -o json </dev/null >/dev/null 2>&1 &",
+    "start-local": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist -f 598 -o json &",
     "lint": "eslint src",
     "fix": "eslint src --fix",
     "test": "nyc ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'",
@@ -42,6 +43,7 @@
     "dotenv-flow": "^3.0.0",
     "mongoose": "^5.7.9",
     "mongoose-timestamp": "^0.6.0",
+    "node-cron": "^2.0.3",
     "request": "^2.82.0",
     "request-promise": "^4.2.1",
     "smart-contract-loader": "^1.0.5",
