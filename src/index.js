@@ -117,10 +117,26 @@ const main = async () => {
 
   cron.schedule('0 20 * * *', async () => {
      logger.info("Called Reminder Cron");
-     await callFetch('sendReminderNotification',{})
+     await callFetch('sendReminderNotification','POST',{})
   }, {
     scheduled: true,
     timezone: "America/Chicago"
+  });
+
+  cron.schedule('58 20 * * *', async () => {
+    logger.info("Called Set Campaign Winner");
+    await callFetch('campaign/nextDayTest',PUT,{})
+  }, {
+   scheduled: true,
+   timezone: "America/Chicago"
+  });
+
+  cron.schedule('00 21 * * *', async () => {
+    logger.info("Called NEXT PERIOD");
+    await callFetch('campaign/nextDayTest',PUT,{})
+  }, {
+   scheduled: true,
+   timezone: "America/Chicago"
   });
    
    
