@@ -9,7 +9,7 @@
   "scripts": {
     "build": "./node_modules/.bin/babel ./src --experimental --source-maps-inline -d ./dist",
     "start": "nohup ./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist -f 598 -o json </dev/null >/dev/null 2>&1 &",
-    "start-local": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist -f 598 -o json &",
+    "start-local": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist -f 0 -o json &",
     "lint": "eslint src",
     "fix": "eslint src --fix",
     "test": "nyc ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'",

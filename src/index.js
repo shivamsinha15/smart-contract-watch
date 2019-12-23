@@ -125,7 +125,7 @@ const main = async () => {
 
   cron.schedule('58 20 * * *', async () => {
     logger.info("Called Set Campaign Winner");
-    await callFetch('campaign/nextDayTest',PUT,{})
+    await callFetch('campaign/nextDayTest','PUT',{})
   }, {
    scheduled: true,
    timezone: "America/Chicago"
@@ -133,7 +133,7 @@ const main = async () => {
 
   cron.schedule('00 21 * * *', async () => {
     logger.info("Called NEXT PERIOD");
-    await callFetch('campaign/nextDayTest',PUT,{})
+    await callFetch('campaign/nextDayTest','PUT',{})
   }, {
    scheduled: true,
    timezone: "America/Chicago"
